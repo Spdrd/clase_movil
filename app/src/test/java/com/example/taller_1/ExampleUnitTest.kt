@@ -1,4 +1,4 @@
-package com.example.mi_primera_app
+package com.example.taller_1
 
 import org.junit.Test
 
