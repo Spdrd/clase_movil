@@ -2,6 +2,7 @@
 
 package com.example.taller_1
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -25,14 +26,22 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.example.taller_1.model.Company
 import com.example.taller_1.model.User
+import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,7 +53,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ){
-                    MainScreen()
+                    NavigationStack()
                 }
             }
         }
@@ -82,15 +91,37 @@ val users = listOf(
     User(20, "Patricia", "Ríos", Company("Moda", "Zara", "Diseñadora de Moda"), "https://example.com/patricia.jpg", "Fuentes", 30, "Female", "patricia@example.com", "+57 3301122334")
 )
 
+sealed class Screen(val route: String) {
+    object Main: Screen("main_screen")
+    object Detail: Screen("detail_screen")
+}
+
 @Composable
 fun NavigationStack() {
     val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = Screen.Main.route) {
+        composable(route = Screen.Main.route) {
+            MainScreen(navController = navController)
+        }
+        composable(
+            route = Screen.Detail.route + "?user_json={user}",
+            arguments = listOf(
+                navArgument("user_json") {
+                    type = NavType.StringType
+                    nullable = true
+                }
+            )
+        ) {
+            DetailScreen(user_json = it.arguments?.getString("user"))
+        }
+    }
 }
 
 
 
 @Composable
-fun MainScreen(){
+fun MainScreen(navController: NavController){
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
@@ -104,11 +135,33 @@ fun MainScreen(){
                 }
             }
             items(users){
-                user -> UserListItem(user = user, onClick = {})
+                user -> UserListItem(user = user, onClick = {
+                    val user_json = Json.encodeToString(user)
+                    navController.navigate(route = Screen.Detail.route + "?user_json=${user_json}")
+            })
             }
         }
     }
 }
+
+@Composable
+fun DetailScreen(user_json: String?) {
+    val user = user_json.let {
+        if (user_json != null) {
+            Json.decodeFromString<User>(user_json)
+        }
+    }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        Text("Detail Screen")
+        Text("${user_json}")
+    }
+}
+
+
 
 @Composable
 fun UserListItem(user: User, onClick: () -> Unit) {
@@ -172,7 +225,21 @@ fun GreetingPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ){
-            MainScreen()
+            NavigationStack()
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun DEtailsPreview() {
+    MaterialTheme{
+        Surface (
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ){
+            DetailScreen("")
+        }
+    }
+}
+
