@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.HorizontalDivider
@@ -26,8 +28,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,6 +48,8 @@ import com.example.taller_1.model.Company
 import com.example.taller_1.model.User
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import coil3.compose.AsyncImage
+import com.example.taller_1.api.KtorApiClient
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -67,7 +77,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         modifier = modifier
     )
 }
-
+/*
 val users = listOf(
     User(1, "Juan", "Pérez", Company("Tecnología", "Google", "Ingeniero de Software"), "https://example.com/juan.jpg", "Gómez", 28, "Male", "juan@example.com", "+57 3001234567"),
     User(2, "María", "García", Company("Marketing", "Meta", "Especialista en Redes Sociales"), "https://example.com/maria.jpg", "López", 25, "Female", "maria@example.com", "+57 3012345678"),
@@ -90,6 +100,7 @@ val users = listOf(
     User(19, "Esteban", "Navarro", Company("Transporte", "Uber", "Gerente de Proyectos"), "https://example.com/esteban.jpg", "Blanco", 36, "Male", "esteban@example.com", "+57 3290011223"),
     User(20, "Patricia", "Ríos", Company("Moda", "Zara", "Diseñadora de Moda"), "https://example.com/patricia.jpg", "Fuentes", 30, "Female", "patricia@example.com", "+57 3301122334")
 )
+*/
 
 sealed class Screen(val route: String) {
     object Main: Screen("main_screen")
@@ -113,7 +124,7 @@ fun NavigationStack() {
                 }
             )
         ) {
-            DetailScreen(user_json = it.arguments?.getString("user"))
+            DetailScreen()
         }
     }
 }
@@ -122,6 +133,12 @@ fun NavigationStack() {
 
 @Composable
 fun MainScreen(navController: NavController){
+    val ktorClient = KtorApiClient()
+    var users by remember { mutableStateOf(listOf<User>())}
+
+    LaunchedEffect(Unit) {
+        users = ktorClient.getUsers().results
+    }
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
@@ -145,19 +162,13 @@ fun MainScreen(navController: NavController){
 }
 
 @Composable
-fun DetailScreen(user_json: String?) {
-    val user = user_json.let {
-        if (user_json != null) {
-            Json.decodeFromString<User>(user_json)
-        }
-    }
+fun DetailScreen() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
         Text("Detail Screen")
-        Text("${user_json}")
     }
 }
 
@@ -173,14 +184,13 @@ fun UserListItem(user: User, onClick: () -> Unit) {
         ListItem(
             modifier = Modifier.padding(5.dp),
             leadingContent = {
-                /*
+
                 AsyncImage(
                     model = user.image,
                     contentDescription = null,
                     modifier = Modifier.size(85.dp)
                         .clip(CircleShape)
                 )
-                */
             },
             headlineContent = {
                 Text(
@@ -238,7 +248,7 @@ fun DEtailsPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ){
-            DetailScreen("")
+            DetailScreen()
         }
     }
 }
