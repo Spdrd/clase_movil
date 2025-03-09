@@ -2,6 +2,7 @@
 
 package com.example.taller_1
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -11,8 +12,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -21,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -37,6 +41,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,14 +49,16 @@ import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.example.taller_1.model.Company
 import com.example.taller_1.model.User
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import coil3.compose.AsyncImage
 import com.example.taller_1.api.KtorApiClient
+import com.example.taller_1.model.Company
+import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonPrimitive
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,41 +111,82 @@ val users = listOf(
 
 sealed class Screen(val route: String) {
     object Main: Screen("main_screen")
-    object Detail: Screen("detail_screen")
+    object Detail: Screen(
+        "detail_screen"
+    )
+    object Error: Screen("error?error={error}")
 }
 
 @Composable
 fun NavigationStack() {
     val navController = rememberNavController()
-
     NavHost(navController = navController, startDestination = Screen.Main.route) {
         composable(route = Screen.Main.route) {
             MainScreen(navController = navController)
         }
         composable(
-            route = Screen.Detail.route + "?user_json={user}",
+            route = Screen.Detail.route + "?id={id}&firstName={firstName}&lastName={lastName}&maidenName={maidenName}&age={age}&gender={gender}&email={email}&image={image}&companyName={companyName}&companyDepartment={companyDepartment}&companyTitle={companyTitle}",
             arguments = listOf(
-                navArgument("user_json") {
+                navArgument("id") { type = NavType.IntType },
+                navArgument("firstName") { type = NavType.StringType },
+                navArgument("lastName") { type = NavType.StringType },
+                navArgument("maidenName") { type = NavType.StringType },
+                navArgument("age") { type = NavType.IntType },
+                navArgument("gender") { type = NavType.StringType },
+                navArgument("email") { type = NavType.StringType },
+                navArgument("image") { type = NavType.StringType },
+                navArgument("companyName") { type = NavType.StringType },
+                navArgument("companyDepartment") { type = NavType.StringType },
+                navArgument("companyTitle") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            DetailScreen(
+                id = backStackEntry.arguments?.getInt("id") ?: 0,
+                firstName = backStackEntry.arguments?.getString("firstName") ?: "",
+                lastName = backStackEntry.arguments?.getString("lastName") ?: "",
+                maidenName = backStackEntry.arguments?.getString("maidenName") ?: "",
+                age = backStackEntry.arguments?.getInt("age") ?: 0,
+                gender = backStackEntry.arguments?.getString("gender") ?: "",
+                email = backStackEntry.arguments?.getString("email") ?: "",
+                image = backStackEntry.arguments?.getString("image") ?: "",
+                companyName = backStackEntry.arguments?.getString("companyName") ?: "",
+                companyDepartment = backStackEntry.arguments?.getString("companyDepartment") ?: "",
+                companyTitle = backStackEntry.arguments?.getString("companyTitle") ?: ""
+            )
+        }
+        composable(
+            route = Screen.Error.route,
+            arguments = listOf(
+                navArgument("error"){
                     type = NavType.StringType
+                    defaultValue = "Ocurrió un error inesperado"
                     nullable = true
                 }
             )
-        ) {
-            DetailScreen()
+        )
+        {
+            backStackEntry ->
+            val error = backStackEntry.arguments?.getString("error") ?: "Error desconocido"
+            ErrorScreen(error)
         }
     }
 }
 
 
-
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(navController: NavController){
     val ktorClient = KtorApiClient()
     var users by remember { mutableStateOf(listOf<User>())}
 
     LaunchedEffect(Unit) {
-        users = ktorClient.getUsers().results
+        try {
+            users = ktorClient.getUsers().users
+        } catch (e: Exception) {
+            navController.navigate(Screen.Error.route + "?error=${e.message}")
+        }
     }
+
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center
@@ -152,27 +200,87 @@ fun MainScreen(navController: NavController){
                 }
             }
             items(users){
-                user -> UserListItem(user = user, onClick = {
-                    val user_json = Json.encodeToString(user)
-                    navController.navigate(route = Screen.Detail.route + "?user_json=${user_json}")
-            })
+                user -> UserListItem(
+                    user = user,
+                    onClick = {
+                        navController.navigate(
+                            "detail_screen?id=${user.id}" +
+                                    "&firstName=${user.firstName}" +
+                                    "&lastName=${user.lastName}" +
+                                    "&maidenName=${user.maidenName}" +
+                                    "&age=${user.age}" +
+                                    "&gender=${user.gender}" +
+                                    "&email=${user.email}" +
+                                    "&image=${user.image}" +
+                                    "&companyName=${user.company.name}" +
+                                    "&companyDepartment=${user.company.department}" +
+                                    "&companyTitle=${user.company.title}"
+                        )
+
+
+
+                    })
             }
         }
     }
 }
 
 @Composable
-fun DetailScreen() {
+fun ErrorScreen(error : String?){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxSize()
     ) {
-        Text("Detail Screen")
+        Text("Error: " + error)
+    }
+}
+
+@Composable
+fun DetailScreen(
+    id: Int,
+    firstName: String,
+    lastName: String,
+    maidenName: String,
+    age: Int,
+    gender: String,
+    email: String,
+    image: String,
+    companyName: String,
+    companyDepartment: String,
+    companyTitle: String
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxSize()
+    ) {
+        AsyncImage(
+            model = image,
+            contentDescription = null,
+            modifier = Modifier
+                .size(85.dp)
+                .clip(CircleShape)
+        )
+        Text("$firstName $lastName")
+        Text(id.toString())
+        Text(maidenName)
+        Text(age.toString())
+        Text(gender)
+        Text(email)
+        Text(companyName)
+        Text(companyDepartment)
+        Text(companyTitle)
     }
 }
 
 
+fun dialPhoneNumber(context: android.content.Context, phoneNumber: String) {
+    val intent = Intent(Intent.ACTION_DIAL).apply {
+        data = Uri.parse("tel:$phoneNumber")
+    }
+    context.startActivity(intent)
+}
 
 @Composable
 fun UserListItem(user: User, onClick: () -> Unit) {
@@ -194,7 +302,7 @@ fun UserListItem(user: User, onClick: () -> Unit) {
             },
             headlineContent = {
                 Text(
-                    text = user.name,
+                    text = user.firstName,
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold)
@@ -243,12 +351,14 @@ fun GreetingPreview() {
 @Preview(showBackground = true)
 @Composable
 fun DEtailsPreview() {
+    val user = User(2, "María", "García", Company("Marketing", "Meta", "Especialista en Redes Sociales"), "https://example.com/maria.jpg", "López", 25, "Female", "maria@example.com", "+57 3012345678")
+
     MaterialTheme{
         Surface (
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ){
-            DetailScreen()
+
         }
     }
 }

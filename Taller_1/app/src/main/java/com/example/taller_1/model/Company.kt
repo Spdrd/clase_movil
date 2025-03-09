@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class Company (
-    val deparment:  String,
+    val department:  String,
     val name:       String,
     val title:      String
 )
