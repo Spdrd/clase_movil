@@ -125,7 +125,7 @@ fun NavigationStack() {
             MainScreen(navController = navController)
         }
         composable(
-            route = Screen.Detail.route + "?id={id}&firstName={firstName}&lastName={lastName}&maidenName={maidenName}&age={age}&gender={gender}&email={email}&image={image}&companyName={companyName}&companyDepartment={companyDepartment}&companyTitle={companyTitle}",
+            route = Screen.Detail.route + "?id={id}&firstName={firstName}&lastName={lastName}&maidenName={maidenName}&age={age}&gender={gender}&email={email}&image={image}&companyName={companyName}&companyDepartment={companyDepartment}&companyTitle={companyTitle}&phone={phone}",
             arguments = listOf(
                 navArgument("id") { type = NavType.IntType },
                 navArgument("firstName") { type = NavType.StringType },
@@ -137,7 +137,8 @@ fun NavigationStack() {
                 navArgument("image") { type = NavType.StringType },
                 navArgument("companyName") { type = NavType.StringType },
                 navArgument("companyDepartment") { type = NavType.StringType },
-                navArgument("companyTitle") { type = NavType.StringType }
+                navArgument("companyTitle") { type = NavType.StringType },
+                navArgument("phone") { type = NavType.StringType }
             )
         ) { backStackEntry ->
             DetailScreen(
@@ -151,27 +152,12 @@ fun NavigationStack() {
                 image = backStackEntry.arguments?.getString("image") ?: "",
                 companyName = backStackEntry.arguments?.getString("companyName") ?: "",
                 companyDepartment = backStackEntry.arguments?.getString("companyDepartment") ?: "",
-                companyTitle = backStackEntry.arguments?.getString("companyTitle") ?: ""
+                companyTitle = backStackEntry.arguments?.getString("companyTitle") ?: "",
+                phone = backStackEntry.arguments?.getString("phone") ?: ""
             )
-        }
-        composable(
-            route = Screen.Error.route,
-            arguments = listOf(
-                navArgument("error"){
-                    type = NavType.StringType
-                    defaultValue = "Ocurrió un error inesperado"
-                    nullable = true
-                }
-            )
-        )
-        {
-            backStackEntry ->
-            val error = backStackEntry.arguments?.getString("error") ?: "Error desconocido"
-            ErrorScreen(error)
         }
     }
 }
-
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -214,7 +200,8 @@ fun MainScreen(navController: NavController){
                                     "&image=${user.image}" +
                                     "&companyName=${user.company.name}" +
                                     "&companyDepartment=${user.company.department}" +
-                                    "&companyTitle=${user.company.title}"
+                                    "&companyTitle=${user.company.title}" +
+                                    "&phone=${user.phone}"
                         )
 
 
@@ -248,7 +235,9 @@ fun DetailScreen(
     image: String,
     companyName: String,
     companyDepartment: String,
-    companyTitle: String
+    companyTitle: String,
+    phone: String
+
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -271,6 +260,18 @@ fun DetailScreen(
         Text(companyName)
         Text(companyDepartment)
         Text(companyTitle)
+        val context = LocalContext.current
+        Text(
+            text = "$phone",
+            style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = {
+            dialPhoneNumber(context, phone)
+        }) {
+            Text("Llamar a este número")
+        }
+
+
     }
 }
 
