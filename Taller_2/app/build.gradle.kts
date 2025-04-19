@@ -61,6 +61,13 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended:1.6.1")
     implementation("androidx.activity:activity-compose:1.8.2")
 
+
+    // Maps
+    implementation("com.google.maps.android:maps-compose:2.11.4")
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+
+
+
     // Coil
     implementation("io.coil-kt.coil3:coil-compose:3.1.0")
 

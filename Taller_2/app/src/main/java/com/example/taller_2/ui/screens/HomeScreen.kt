@@ -1,5 +1,6 @@
 package com.example.taller_2.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,11 +21,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(navController: NavController) {
     // Fondo blanco, contenido centrado
     Box(
         modifier = Modifier
@@ -38,7 +41,7 @@ fun HomeScreen() {
         ) {
             // Botón "Abrir Cámara"
             Button(
-                onClick = { /* Acción para abrir cámara */ },
+                onClick = { navController.navigate(route = Screen.Picture.route) },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF2D4379), // Azul oscuro
                     contentColor = Color.White
@@ -77,6 +80,7 @@ fun HomeScreen() {
 @Preview
 @Composable
 fun Prev(){
-    HomeScreen()
+    val context = LocalContext.current
+    HomeScreen(NavController(context = context))
 }
 

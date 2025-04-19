@@ -10,14 +10,18 @@ import androidx.navigation.compose.rememberNavController
 fun NavigationStack(){
     val navController = rememberNavController()
     val screens = listOf(
-        Screen.Home
+        Screen.Home,
+        Screen.Picture,
+        Screen.Map
     )
     Box(){
         NavHost(navController = navController, startDestination = Screen.Home.route){
             screens.forEach{ screen ->
                 composable(route = screen.route){
                     when (screen){
-                        is Screen.Home -> HomeScreen()
+                        is Screen.Home      -> HomeScreen(navController)
+                        is Screen.Picture   -> PictureScreen()
+                        is Screen.Map       -> MapScreen()
                     }
                 }
             }
@@ -26,5 +30,7 @@ fun NavigationStack(){
 }
 
 sealed class Screen(val route: String){
-    object Home :   Screen("home")
+    object Home     :   Screen("home")
+    object Picture  :   Screen("picture")
+    object Map      :   Screen("map")
 }
