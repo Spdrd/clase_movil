@@ -62,10 +62,23 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.2")
 
 
-    // Maps
-    implementation("com.google.maps.android:maps-compose:2.11.4")
+    // Permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.36.0")
+
+    // Android Maps Compose composables for the Maps SDK for Android
+    implementation("com.google.maps.android:maps-compose:6.4.1")
+
+    // Google Play Services Maps
     implementation("com.google.android.gms:play-services-maps:18.2.0")
 
+    // Manejo de LifeCycle
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+
+    // Location Services
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
+    // Corrutinas para Play Services
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
 
     // Coil

@@ -39,6 +39,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.taller_2.R
+import com.example.taller_2.utils.LocationHelper
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -53,6 +55,10 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.coroutines.launch
+
+import com.example.taller_2.utils.LocationPermissionHandler
+import com.icm2510.maps.sensors.LightSensor
+
 
 @Composable
 fun MapScreen() {
@@ -137,7 +143,9 @@ fun MapScreen() {
         isDarkMap = isLowLight
     }
 
+
     // Configurar el estilo del mapa:
+
     val mapProperties by remember(isDarkMap) {
         mutableStateOf(
             MapProperties(

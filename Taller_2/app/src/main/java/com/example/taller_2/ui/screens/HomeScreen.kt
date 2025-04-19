@@ -58,7 +58,7 @@ fun HomeScreen(navController: NavController) {
 
             // Botón "Abrir Mapa"
             Button(
-                onClick = { /* Acción para abrir mapa */ },
+                onClick = { navController.navigate(Screen.Map.route) },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFF5F6FA), // Color claro
                     contentColor = Color(0xFF2D4379)    // Mismo azul oscuro
