@@ -173,7 +173,12 @@ fun MapScreen() {
             contentPadding = PaddingValues(
                 top = 150.dp
             ),
-            properties = mapProperties,
+            properties = MapProperties(
+                isMyLocationEnabled = isMapLoaded && hasPermission
+            ),
+            onMapLoaded = {
+                isMapLoaded = true
+            },
             uiSettings = mapUiSettings,
             cameraPositionState = cameraPositionState, // Usar el estado de la cámara
             onMapLongClick = { latLng ->
