@@ -59,7 +59,6 @@ import kotlinx.coroutines.launch
 import com.example.taller_2.utils.LocationPermissionHandler
 import com.icm2510.maps.sensors.LightSensor
 
-
 @Composable
 fun MapScreen() {
     val context = LocalContext.current
@@ -143,9 +142,7 @@ fun MapScreen() {
         isDarkMap = isLowLight
     }
 
-
     // Configurar el estilo del mapa:
-
     val mapProperties by remember(isDarkMap) {
         mutableStateOf(
             MapProperties(
@@ -173,12 +170,7 @@ fun MapScreen() {
             contentPadding = PaddingValues(
                 top = 150.dp
             ),
-            properties = MapProperties(
-                isMyLocationEnabled = isMapLoaded && hasPermission
-            ),
-            onMapLoaded = {
-                isMapLoaded = true
-            },
+            properties = mapProperties,
             uiSettings = mapUiSettings,
             cameraPositionState = cameraPositionState, // Usar el estado de la cámara
             onMapLongClick = { latLng ->

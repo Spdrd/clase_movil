@@ -80,7 +80,6 @@ dependencies {
     // Corrutinas para Play Services
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
 
-
     // Coil
     implementation("io.coil-kt.coil3:coil-compose:3.1.0")
 
